@@ -5,6 +5,7 @@ import com.upb.pigmentos_api.model.Pigmento;
 import com.upb.pigmentos_api.service.FamiliaService;
 import com.upb.pigmentos_api.service.PigmentoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,13 +39,13 @@ public class FamiliaController {
         if (service.findById(familia_id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
         List<Pigmento> pigmentos = pigmentoService.findByFamiliaQuimicaId(familia_id);
         return ResponseEntity.ok(pigmentos);
     }
+
     @PostMapping
     public ResponseEntity<FamiliaQuimica> create(@RequestBody FamiliaQuimica familia) {
-        return ResponseEntity.ok(service.create(familia));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(familia));
     }
 
     @PutMapping("/{id}")
@@ -55,8 +56,6 @@ public class FamiliaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204
     }
-
-
 }

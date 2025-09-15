@@ -5,6 +5,7 @@ import com.upb.pigmentos_api.model.Pigmento;
 import com.upb.pigmentos_api.service.ColorService;
 import com.upb.pigmentos_api.service.PigmentoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,7 +45,7 @@ public class ColorController {
 
     @PostMapping
     public ResponseEntity<Color> create(@RequestBody Color color) {
-        return ResponseEntity.ok(colorService.create(color));
+        return ResponseEntity.status(HttpStatus.CREATED).body(colorService.create(color));
     }
 
     @PutMapping("/{id}")
@@ -55,7 +56,6 @@ public class ColorController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         colorService.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204
     }
-
 }

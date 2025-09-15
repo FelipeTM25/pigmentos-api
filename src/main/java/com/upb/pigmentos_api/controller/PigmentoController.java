@@ -3,6 +3,7 @@ package com.upb.pigmentos_api.controller;
 import com.upb.pigmentos_api.model.Pigmento;
 import com.upb.pigmentos_api.service.PigmentoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,7 @@ public class PigmentoController {
 
     @PostMapping
     public ResponseEntity<Pigmento> create(@RequestBody Pigmento pigmento) {
-        return ResponseEntity.ok(service.create(pigmento));
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(pigmento));
     }
 
     @PutMapping("/{id}")
@@ -41,6 +42,6 @@ public class PigmentoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204
     }
 }
