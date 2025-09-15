@@ -1,9 +1,11 @@
 package com.upb.pigmentos_api.controller;
 
+import com.upb.pigmentos_api.dto.FamiliaRequestDTO;
 import com.upb.pigmentos_api.model.FamiliaQuimica;
 import com.upb.pigmentos_api.model.Pigmento;
 import com.upb.pigmentos_api.service.FamiliaService;
 import com.upb.pigmentos_api.service.PigmentoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,23 +41,30 @@ public class FamiliaController {
         if (service.findById(familia_id).isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        List<Pigmento> pigmentos = pigmentoService.findByFamiliaQuimicaId(familia_id);
-        return ResponseEntity.ok(pigmentos);
+        return ResponseEntity.ok(pigmentoService.findByFamiliaQuimicaId(familia_id));
     }
 
     @PostMapping
-    public ResponseEntity<FamiliaQuimica> create(@RequestBody FamiliaQuimica familia) {
+    public ResponseEntity<FamiliaQuimica> create(@Valid @RequestBody FamiliaRequestDTO dto) {
+        FamiliaQuimica familia = new FamiliaQuimica();
+        familia.setNombre(dto.nombre());
+        familia.setDescripcion(dto.descripcion());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(familia));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FamiliaQuimica> update(@PathVariable UUID id, @RequestBody FamiliaQuimica familia) {
+    public ResponseEntity<FamiliaQuimica> update(@PathVariable UUID id, @Valid @RequestBody FamiliaRequestDTO dto) {
+        FamiliaQuimica familia = new FamiliaQuimica();
+        familia.setNombre(dto.nombre());
+        familia.setDescripcion(dto.descripcion());
+
         return ResponseEntity.ok(service.update(id, familia));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
-        return ResponseEntity.noContent().build(); // 204
+        return ResponseEntity.noContent().build();
     }
 }

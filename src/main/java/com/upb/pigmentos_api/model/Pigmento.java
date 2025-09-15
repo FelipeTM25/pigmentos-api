@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Entity
-@Table(name = "pigmento", schema = "pigmentos")
+@Table(name = "pigmentos", schema = "pigmentos")
 @Data
 public class Pigmento {
     @Id
