@@ -64,6 +64,9 @@ public class PigmentoServiceImpl implements PigmentoService {
     @Override
     @Transactional
     public Pigmento update(UUID id, Pigmento pigmento) {
+        Pigmento existing = repository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Pigmento no encontrado"));
+
         entityManager.createStoredProcedureQuery("pigmentos.sp_actualizar_pigmento")
                 .registerStoredProcedureParameter("p_id", UUID.class, jakarta.persistence.ParameterMode.IN)
                 .registerStoredProcedureParameter("p_nombre_comercial", String.class, jakarta.persistence.ParameterMode.IN)
@@ -79,13 +82,21 @@ public class PigmentoServiceImpl implements PigmentoService {
                 .setParameter("p_color_principal", pigmento.getColorPrincipal().getId())
                 .execute();
 
-        pigmento.setId(id);
-        return pigmento;
+        existing.setNombreComercial(pigmento.getNombreComercial());
+        existing.setFormulaQuimica(pigmento.getFormulaQuimica());
+        existing.setNumeroCi(pigmento.getNumeroCi());
+        existing.setFamiliaQuimica(pigmento.getFamiliaQuimica());
+        existing.setColorPrincipal(pigmento.getColorPrincipal());
+        return existing;
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
+        if (!repository.existsById(id)) {
+            throw new jakarta.persistence.EntityNotFoundException("Pigmento no encontrado");
+        }
+
         entityManager.createStoredProcedureQuery("pigmentos.sp_eliminar_pigmento")
                 .registerStoredProcedureParameter("p_id", UUID.class, jakarta.persistence.ParameterMode.IN)
                 .setParameter("p_id", id)

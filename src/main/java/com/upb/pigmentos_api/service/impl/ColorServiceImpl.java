@@ -61,6 +61,9 @@ public class ColorServiceImpl implements ColorService {
     @Override
     @Transactional
     public Color update(UUID id, Color color) {
+        Color existing = repository.findById(id)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Color no encontrado"));
+
         entityManager.createStoredProcedureQuery("pigmentos.sp_actualizar_color")
                 .registerStoredProcedureParameter("p_id", UUID.class, jakarta.persistence.ParameterMode.IN)
                 .registerStoredProcedureParameter("p_nombre", String.class, jakarta.persistence.ParameterMode.IN)
@@ -70,13 +73,18 @@ public class ColorServiceImpl implements ColorService {
                 .setParameter("p_codigo_hexadecimal", color.getCodigoHexadecimal())
                 .execute();
 
-        color.setId(id);
-        return color;
+        existing.setNombre(color.getNombre());
+        existing.setCodigoHexadecimal(color.getCodigoHexadecimal());
+        return existing;
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
+        if (!repository.existsById(id)) {
+            throw new jakarta.persistence.EntityNotFoundException("Color no encontrado");
+        }
+
         entityManager.createStoredProcedureQuery("pigmentos.sp_eliminar_color")
                 .registerStoredProcedureParameter("p_id", UUID.class, jakarta.persistence.ParameterMode.IN)
                 .setParameter("p_id", id)

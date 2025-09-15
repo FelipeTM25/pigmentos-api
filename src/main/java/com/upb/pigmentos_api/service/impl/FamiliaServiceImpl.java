@@ -62,7 +62,8 @@ public class FamiliaServiceImpl implements FamiliaService {
     @Transactional
     public FamiliaQuimica update(UUID id, FamiliaQuimica familia) {
         FamiliaQuimica existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Familia no encontrada"));
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Familia no encontrada"));
+
         existing.setNombre(familia.getNombre());
         existing.setDescripcion(familia.getDescripcion());
         return repository.save(existing);
@@ -71,6 +72,9 @@ public class FamiliaServiceImpl implements FamiliaService {
     @Override
     @Transactional
     public void delete(UUID id) {
+        if (!repository.existsById(id)) {
+            throw new jakarta.persistence.EntityNotFoundException("Familia no encontrada");
+        }
         repository.deleteById(id);
     }
 }
