@@ -1,6 +1,9 @@
 package com.upb.pigmentos_api.service.impl;
 
+import com.upb.pigmentos_api.exception.DuplicateResourceException;
 import com.upb.pigmentos_api.model.Pigmento;
+import com.upb.pigmentos_api.repository.ColorRepository;
+import com.upb.pigmentos_api.repository.FamiliaRepository;
 import com.upb.pigmentos_api.repository.PigmentoRepository;
 import com.upb.pigmentos_api.service.PigmentoService;
 import jakarta.persistence.EntityManager;
@@ -25,6 +28,12 @@ public class PigmentoServiceImpl implements PigmentoService {
     @Autowired
     private PigmentoRepository repository;
 
+    @Autowired
+    private FamiliaRepository familiaRepository;
+
+    @Autowired
+    private ColorRepository colorRepository;
+
     @Override
     @Transactional(readOnly = true)
     public List<Pigmento> findAll() {
@@ -40,6 +49,20 @@ public class PigmentoServiceImpl implements PigmentoService {
     @Override
     @Transactional
     public Pigmento create(Pigmento pigmento) {
+        if (repository.findByNumeroCi(pigmento.getNumeroCi()).isPresent()) {
+            throw new DuplicateResourceException("Ya existe un pigmento con ese número CI.");
+        }
+
+        UUID famId = pigmento.getFamiliaQuimica().getId();
+        UUID colorId = pigmento.getColorPrincipal().getId();
+
+        if (!familiaRepository.existsById(famId)) {
+            throw new jakarta.persistence.EntityNotFoundException("Familia no encontrada");
+        }
+        if (!colorRepository.existsById(colorId)) {
+            throw new jakarta.persistence.EntityNotFoundException("Color no encontrado");
+        }
+
         Session session = entityManager.unwrap(Session.class);
 
         session.doWork(connection -> {
@@ -47,8 +70,8 @@ public class PigmentoServiceImpl implements PigmentoService {
                 call.setString(1, pigmento.getNombreComercial());
                 call.setString(2, pigmento.getFormulaQuimica());
                 call.setString(3, pigmento.getNumeroCi());
-                call.setObject(4, pigmento.getFamiliaQuimica().getId());
-                call.setObject(5, pigmento.getColorPrincipal().getId());
+                call.setObject(4, famId);
+                call.setObject(5, colorId);
                 call.registerOutParameter(6, Types.OTHER);
 
                 call.execute();
@@ -67,6 +90,21 @@ public class PigmentoServiceImpl implements PigmentoService {
         Pigmento existing = repository.findById(id)
                 .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Pigmento no encontrado"));
 
+        Optional<Pigmento> byNumero = repository.findByNumeroCi(pigmento.getNumeroCi());
+        if (byNumero.isPresent() && !byNumero.get().getId().equals(id)) {
+            throw new DuplicateResourceException("El número CI ya está registrado por otro pigmento.");
+        }
+
+        UUID famId = pigmento.getFamiliaQuimica().getId();
+        UUID colorId = pigmento.getColorPrincipal().getId();
+
+        if (!familiaRepository.existsById(famId)) {
+            throw new jakarta.persistence.EntityNotFoundException("Familia no encontrada");
+        }
+        if (!colorRepository.existsById(colorId)) {
+            throw new jakarta.persistence.EntityNotFoundException("Color no encontrado");
+        }
+
         entityManager.createStoredProcedureQuery("pigmentos.sp_actualizar_pigmento")
                 .registerStoredProcedureParameter("p_id", UUID.class, jakarta.persistence.ParameterMode.IN)
                 .registerStoredProcedureParameter("p_nombre_comercial", String.class, jakarta.persistence.ParameterMode.IN)
@@ -78,8 +116,8 @@ public class PigmentoServiceImpl implements PigmentoService {
                 .setParameter("p_nombre_comercial", pigmento.getNombreComercial())
                 .setParameter("p_formula_quimica", pigmento.getFormulaQuimica())
                 .setParameter("p_numero_ci", pigmento.getNumeroCi())
-                .setParameter("p_familia_quimica", pigmento.getFamiliaQuimica().getId())
-                .setParameter("p_color_principal", pigmento.getColorPrincipal().getId())
+                .setParameter("p_familia_quimica", famId)
+                .setParameter("p_color_principal", colorId)
                 .execute();
 
         existing.setNombreComercial(pigmento.getNombreComercial());

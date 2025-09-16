@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface ColorRepository extends JpaRepository<Color, UUID> {
     Optional<Color> findByNombre(String nombre);
+    Optional<Color> findByCodigoHexadecimal(String codigoHexadecimal);
 }

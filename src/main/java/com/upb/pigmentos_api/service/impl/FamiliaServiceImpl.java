@@ -1,5 +1,6 @@
 package com.upb.pigmentos_api.service.impl;
 
+import com.upb.pigmentos_api.exception.DuplicateResourceException;
 import com.upb.pigmentos_api.model.FamiliaQuimica;
 import com.upb.pigmentos_api.repository.FamiliaRepository;
 import com.upb.pigmentos_api.service.FamiliaService;
@@ -40,6 +41,10 @@ public class FamiliaServiceImpl implements FamiliaService {
     @Override
     @Transactional
     public FamiliaQuimica create(FamiliaQuimica familia) {
+        if (repository.findByNombre(familia.getNombre()).isPresent()) {
+            throw new DuplicateResourceException("Ya existe una familia con ese nombre.");
+        }
+
         Session session = entityManager.unwrap(Session.class);
 
         session.doWork(connection -> {
@@ -63,6 +68,11 @@ public class FamiliaServiceImpl implements FamiliaService {
     public FamiliaQuimica update(UUID id, FamiliaQuimica familia) {
         FamiliaQuimica existing = repository.findById(id)
                 .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Familia no encontrada"));
+
+        Optional<FamiliaQuimica> byName = repository.findByNombre(familia.getNombre());
+        if (byName.isPresent() && !byName.get().getId().equals(id)) {
+            throw new DuplicateResourceException("Ya existe otra familia con ese nombre.");
+        }
 
         existing.setNombre(familia.getNombre());
         existing.setDescripcion(familia.getDescripcion());

@@ -1,5 +1,6 @@
 package com.upb.pigmentos_api.service.impl;
 
+import com.upb.pigmentos_api.exception.DuplicateResourceException;
 import com.upb.pigmentos_api.model.Color;
 import com.upb.pigmentos_api.repository.ColorRepository;
 import com.upb.pigmentos_api.service.ColorService;
@@ -40,6 +41,13 @@ public class ColorServiceImpl implements ColorService {
     @Override
     @Transactional
     public Color create(Color color) {
+        if (repository.findByNombre(color.getNombre()).isPresent()) {
+            throw new DuplicateResourceException("Ya existe un color con ese nombre.");
+        }
+        if (repository.findByCodigoHexadecimal(color.getCodigoHexadecimal()).isPresent()) {
+            throw new DuplicateResourceException("El código hexadecimal ya está registrado.");
+        }
+
         Session session = entityManager.unwrap(Session.class);
 
         session.doWork(connection -> {
@@ -63,6 +71,16 @@ public class ColorServiceImpl implements ColorService {
     public Color update(UUID id, Color color) {
         Color existing = repository.findById(id)
                 .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Color no encontrado"));
+
+        Optional<Color> byName = repository.findByNombre(color.getNombre());
+        if (byName.isPresent() && !byName.get().getId().equals(id)) {
+            throw new DuplicateResourceException("Ya existe otro color con ese nombre.");
+        }
+
+        Optional<Color> byCode = repository.findByCodigoHexadecimal(color.getCodigoHexadecimal());
+        if (byCode.isPresent() && !byCode.get().getId().equals(id)) {
+            throw new DuplicateResourceException("El código hexadecimal ya está registrado por otro color.");
+        }
 
         entityManager.createStoredProcedureQuery("pigmentos.sp_actualizar_color")
                 .registerStoredProcedureParameter("p_id", UUID.class, jakarta.persistence.ParameterMode.IN)
