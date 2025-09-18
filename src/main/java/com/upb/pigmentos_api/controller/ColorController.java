@@ -3,8 +3,8 @@ package com.upb.pigmentos_api.controller;
 import com.upb.pigmentos_api.dto.ColorRequestDTO;
 import com.upb.pigmentos_api.model.Color;
 import com.upb.pigmentos_api.model.Pigmento;
-import com.upb.pigmentos_api.service.ColorService;
-import com.upb.pigmentos_api.service.PigmentoService;
+import com.upb.pigmentos_api.interfaces.IColorService;
+import com.upb.pigmentos_api.interfaces.IPigmentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,10 +19,10 @@ import java.util.UUID;
 public class ColorController {
 
     @Autowired
-    private ColorService colorService;
+    private IColorService colorService;
 
     @Autowired
-    private PigmentoService pigmentoService;
+    private IPigmentoService pigmentoService;
 
     @GetMapping
     public ResponseEntity<List<Color>> getAll() {

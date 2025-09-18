@@ -3,8 +3,8 @@ package com.upb.pigmentos_api.controller;
 import com.upb.pigmentos_api.dto.FamiliaRequestDTO;
 import com.upb.pigmentos_api.model.FamiliaQuimica;
 import com.upb.pigmentos_api.model.Pigmento;
-import com.upb.pigmentos_api.service.FamiliaService;
-import com.upb.pigmentos_api.service.PigmentoService;
+import com.upb.pigmentos_api.interfaces.IFamiliaService;
+import com.upb.pigmentos_api.interfaces.IPigmentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,10 +19,10 @@ import java.util.UUID;
 public class FamiliaController {
 
     @Autowired
-    private FamiliaService service;
+    private IFamiliaService service;
 
     @Autowired
-    private PigmentoService pigmentoService;
+    private IPigmentoService pigmentoService;
 
     @GetMapping
     public ResponseEntity<List<FamiliaQuimica>> getAll() {

@@ -4,7 +4,7 @@ import com.upb.pigmentos_api.dto.PigmentoRequestDTO;
 import com.upb.pigmentos_api.model.Color;
 import com.upb.pigmentos_api.model.FamiliaQuimica;
 import com.upb.pigmentos_api.model.Pigmento;
-import com.upb.pigmentos_api.service.PigmentoService;
+import com.upb.pigmentos_api.interfaces.IPigmentoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ import java.util.UUID;
 public class PigmentoController {
 
     @Autowired
-    private PigmentoService service;
+    private IPigmentoService service;
 
     @GetMapping
     public ResponseEntity<List<Pigmento>> getAll() {
